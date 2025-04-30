@@ -1,0 +1,99 @@
+/* Main container styles */
+.pet-profile-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 80px auto 0;
+  overflow: visible; /* Ensures content doesn't get clipped */
+}
+
+/* Download report button - make it stay visible */
+.download-report-container {
+  position: sticky;
+  top: 80px; /* Below navbar */
+  background: white;
+  padding: 10px 0;
+  z-index: 10;
+  margin-bottom: 20px;
+}
+
+/* Grid layout for pet profiles - horizontal scrolling */
+.pet-profiles-grid {
+  display: flex;
+  flex-wrap: nowrap; /* Prevent wrapping to new line */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  gap: 25px;
+  padding-bottom: 20px; /* Space for scrollbar */
+  scrollbar-width: thin; /* For Firefox */
+}
+
+/* For Chrome/Safari scrollbar styling */
+.pet-profiles-grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.pet-profiles-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.pet-profiles-grid::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.pet-profiles-grid::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Pet profile card styles - fixed width for horizontal layout */
+.pet-profile-card {
+  flex: 0 0 280px; /* Fixed width, don't grow or shrink */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+/* Rest of your existing styles... */
+.pet-profile-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.pet-profile-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+/* Add to your petProfile.css */
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.card-actions button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card-actions button:hover {
+  transform: translateY(-2px);
+}
+
+.delete-btn {
+  background-color: #ff4444;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #cc0000;
+}
+
+/* ... keep all other existing styles ... */

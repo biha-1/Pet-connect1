@@ -1,0 +1,18 @@
+/* src/styles/home.css */
+
+.home-container {
+    background-image: url('../images/home-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh; /* Ensures it covers full viewport height */
+    width: 100%;
+  }
+  
+  /* Add any additional styling for content on top of the background */
+  .home-content {
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+    padding: 2rem;
+    border-radius: 8px;
+  }
