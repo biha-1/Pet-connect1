@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/PetProfileForm.css';
-//fucking hell this is so annoying to do, I hate this so much, I just want to go home and sleep, but I have to do this for the sake of my future, I need to get this done, I need to finish this project, I need to get a job, I need to make money, I need to be successful, I need to be happy, I need to be free, I need to be me
+
 const PetProfileForm = () => {
     const [formData, setFormData] = useState({
         name: '',
