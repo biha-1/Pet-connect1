@@ -9,7 +9,16 @@ function ViewPetProfiles() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingPet, setEditingPet] = useState(null);
-  const [updatedDetails, setUpdatedDetails] = useState({});
+  const [updatedDetails, setUpdatedDetails] = useState({
+    name: '',
+    petType: '',
+    age: '',
+    photo: '',
+    adoptionStatus: '',
+    contactNumber: '',
+    breed: '',
+    description: ''
+  });
 
   useEffect(() => {
     fetchPets();
@@ -57,9 +66,17 @@ function ViewPetProfiles() {
       photo: pet.photo,
       adoptionStatus: pet.adoptionStatus,
       contactNumber: pet.contactNumber,
-      breed: pet.breed,
-      description: pet.description
+      breed: pet.breed || '',
+      description: pet.description || ''
     });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUpdatedDetails(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleUpdatePet = async () => {
@@ -85,8 +102,8 @@ function ViewPetProfiles() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="loading">Loading pet profiles...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
     <div className="view-pets-page">
@@ -97,15 +114,23 @@ function ViewPetProfiles() {
         <div className="pet-profiles-grid">
           {pets.map((pet) => (
             <div key={pet._id} className="pet-profile-card">
-              <img src={pet.photo} alt={pet.name} />
-              <h2>{pet.name}</h2>
-              <p>Type: {pet.petType}</p>
-              <p>Age: {pet.age}</p>
-              <p>Status: {pet.adoptionStatus}</p>
-              <p>Contact: {pet.contactNumber}</p>
+              <img src={pet.photo} alt={pet.name} className="pet-image" />
+              <div className="pet-info">
+                <h2>{pet.name}</h2>
+                <p><strong>Type:</strong> {pet.petType}</p>
+                <p><strong>Age:</strong> {pet.age}</p>
+                <p><strong>Status:</strong> {pet.adoptionStatus}</p>
+                <p><strong>Contact:</strong> {pet.contactNumber}</p>
+                {pet.breed && <p><strong>Breed:</strong> {pet.breed}</p>}
+              </div>
               
               <div className="pet-actions">
-                <button onClick={() => handleEditClick(pet)}>Edit</button>
+                <button 
+                  className="edit-btn"
+                  onClick={() => handleEditClick(pet)}
+                >
+                  Edit
+                </button>
                 <button 
                   className="delete-btn"
                   onClick={() => handleDeletePet(pet._id)}
@@ -117,21 +142,110 @@ function ViewPetProfiles() {
           ))}
         </div>
 
+        {/* Edit Modal */}
         {editingPet && (
-          <div className="edit-modal">
-            <h2>Edit {editingPet.name}'s Details</h2>
-            <div className="form-group">
-              <label>Name:</label>
-              <input
-                name="name"
-                value={updatedDetails.name}
-                onChange={(e) => setUpdatedDetails({...updatedDetails, name: e.target.value})}
-              />
-            </div>
-            {/* Add other fields similarly */}
-            <div className="modal-actions">
-              <button onClick={handleUpdatePet}>Save</button>
-              <button onClick={() => setEditingPet(null)}>Cancel</button>
+          <div className="modal-overlay">
+            <div className="edit-modal">
+              <h2>Edit {editingPet.name}'s Details</h2>
+              
+              <div className="form-group">
+                <label>Pet Name:</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={updatedDetails.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Pet Type:</label>
+                <select
+                  name="petType"
+                  value={updatedDetails.petType}
+                  onChange={handleInputChange}
+                >
+                  <option value="Dog">Dog</option>
+                  <option value="Cat">Cat</option>
+                  <option value="Bird">Bird</option>
+                  <option value="Rabbit">Rabbit</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Age:</label>
+                <input
+                  type="number"
+                  name="age"
+                  value={updatedDetails.age}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Photo URL:</label>
+                <input
+                  type="text"
+                  name="photo"
+                  value={updatedDetails.photo}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Adoption Status:</label>
+                <select
+                  name="adoptionStatus"
+                  value={updatedDetails.adoptionStatus}
+                  onChange={handleInputChange}
+                >
+                  <option value="Available">Available</option>
+                  <option value="Adopted">Adopted</option>
+                  <option value="Fostered">Fostered</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Contact Number:</label>
+                <input
+                  type="text"
+                  name="contactNumber"
+                  value={updatedDetails.contactNumber}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Breed (optional):</label>
+                <input
+                  type="text"
+                  name="breed"
+                  value={updatedDetails.breed}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Description (optional):</label>
+                <textarea
+                  name="description"
+                  value={updatedDetails.description}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button className="save-btn" onClick={handleUpdatePet}>
+                  Save Changes
+                </button>
+                <button 
+                  className="cancel-btn"
+                  onClick={() => setEditingPet(null)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
