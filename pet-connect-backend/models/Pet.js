@@ -1,40 +1,50 @@
 import mongoose from 'mongoose';
 
 const PetSchema = new mongoose.Schema({
+  petType: {
+    type: String,
+    required: [true, 'Pet type is required'],
+    enum: ['Dog', 'Cat', 'Bird', 'Rabbit', 'Other']
+  },
   name: {
     type: String,
-    required: true
+    required: [true, 'Pet name is required']
   },
-  type: {
+  age: {
+    type: Number,
+    required: [true, 'Age is required'],
+    min: [0, 'Age cannot be negative']
+  },
+  photo: {
     type: String,
-    required: true
+    required: [true, 'Photo URL is required']
+  },
+  adoptionStatus: {
+    type: String,
+    enum: ['Available', 'Adopted', 'Fostered'],
+    default: 'Available'
+  },
+  contactNumber: {
+    type: String,
+    required: [true, 'Contact number is required'],
+    validate: {
+      validator: function(v) {
+        return /^[0-9]{10,15}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    }
   },
   breed: {
     type: String
   },
-  age: {
-    type: Number,
-    required: true
-  },
-  gender: {
-    type: String,
-    required: true
-  },
   description: {
     type: String
-  },
-  images: {
-    type: [String]
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
-});
+}, { timestamps: true });
 
 export default mongoose.model('Pet', PetSchema);
