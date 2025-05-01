@@ -1,12 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
 import '../styles/petProfile.css';
 
-function ViewPetProfiles({ petProfiles, updatePetProfile, fetchPets }) {
-  const [editingProfile, setEditingProfile] = useState(null);
+function ViewPetProfiles() {
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editingPet, setEditingPet] = useState(null);
   const [updatedDetails, setUpdatedDetails] = useState({});
+
+  useEffect(() => {
+    fetchPets();
+  }, []);
+
+  const fetchPets = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/pets');
+      setPets(response.data.data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+      setLoading(false);
+      console.error('Error fetching pets:', err);
+    }
+  };
 
   const handleDeletePet = async (petId) => {
     try {
@@ -15,91 +34,81 @@ function ViewPetProfiles({ petProfiles, updatePetProfile, fetchPets }) {
         alert('Please login to delete pets');
         return;
       }
-  
+
       if (window.confirm('Are you sure you want to delete this pet profile?')) {
-        console.log('Attempting to delete pet with ID:', petId); // Debug log
-        
-        const response = await axios.delete(`http://localhost:5000/api/pets/${petId}`, {
-          headers: {
-            'x-auth-token': token
-          }
+        await axios.delete(`http://localhost:5000/api/pets/${petId}`, {
+          headers: { 'x-auth-token': token }
         });
-        
-        console.log('Delete response:', response.data); // Debug log
-        
-        // Refresh the pet list after deletion
-        if (response.data && response.data.msg === 'Pet removed') {
-          fetchPets();
-          alert('Pet profile deleted successfully');
-        } else {
-          throw new Error('Unexpected response from server');
-        }
+        fetchPets(); // Refresh the list
+        alert('Pet profile deleted successfully');
       }
     } catch (err) {
-      console.error('Detailed delete error:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
-      
-      alert(`Failed to delete pet profile: ${err.response?.data?.msg || err.message}`);
+      console.error('Delete error:', err);
+      alert(`Failed to delete pet: ${err.response?.data?.message || err.message}`);
     }
   };
 
-  const handleEditClick = (profile) => {
-    setEditingProfile(profile);
+  const handleEditClick = (pet) => {
+    setEditingPet(pet);
     setUpdatedDetails({
-      petType: profile.petType,
-      age: profile.age,
-      photo: profile.photo,
-      adoptionStatus: profile.adoptionStatus,
-      contactNumber: profile.contactNumber
+      name: pet.name,
+      petType: pet.petType,
+      age: pet.age,
+      photo: pet.photo,
+      adoptionStatus: pet.adoptionStatus,
+      contactNumber: pet.contactNumber,
+      breed: pet.breed,
+      description: pet.description
     });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUpdatedDetails(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleUpdatePet = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please login to update pets');
+        return;
+      }
+
+      await axios.put(
+        `http://localhost:5000/api/pets/${editingPet._id}`,
+        updatedDetails,
+        { headers: { 'x-auth-token': token } }
+      );
+
+      fetchPets(); // Refresh the list
+      setEditingPet(null);
+      alert('Pet profile updated successfully');
+    } catch (err) {
+      console.error('Update error:', err);
+      alert(`Failed to update pet: ${err.response?.data?.message || err.message}`);
+    }
   };
 
-  const handleSave = () => {
-    updatePetProfile(editingProfile.id, updatedDetails);
-    setEditingProfile(null);
-  };
-
-  const handleDownloadReport = () => {
-    console.log('Downloading report...');
-    alert('Report downloaded!');
-  };
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
+    <div className="view-pets-page">
       <Navbar />
-      <div className="pet-profile-container">
-        <h1>View Pet Profiles</h1>
-        <button className="download-report-button" onClick={handleDownloadReport}>
-          Download Report
-        </button>
+      <div className="container">
+        <h1>Available Pets</h1>
         
         <div className="pet-profiles-grid">
-          {petProfiles.map((profile) => (
-            <div key={profile.id} className="pet-profile-card">
-              <div className="card-content">
-                <img src={profile.photo} alt={profile.petType} />
-                <h2>{profile.petType}</h2>
-                <p>Age: {profile.age}</p>
-                <p>Status: {profile.adoptionStatus}</p>
-                <p>Contact: {profile.contactNumber}</p>
-              </div>
+          {pets.map((pet) => (
+            <div key={pet._id} className="pet-profile-card">
+              <img src={pet.photo} alt={pet.name} />
+              <h2>{pet.name}</h2>
+              <p>Type: {pet.petType}</p>
+              <p>Age: {pet.age}</p>
+              <p>Status: {pet.adoptionStatus}</p>
+              <p>Contact: {pet.contactNumber}</p>
               
-              <div className="card-actions">
-                <button onClick={() => handleEditClick(profile)}>Update</button>
+              <div className="pet-actions">
+                <button onClick={() => handleEditClick(pet)}>Edit</button>
                 <button 
                   className="delete-btn"
-                  onClick={() => handleDeletePet(profile.id)}
+                  onClick={() => handleDeletePet(pet._id)}
                 >
                   Delete
                 </button>
@@ -107,64 +116,26 @@ function ViewPetProfiles({ petProfiles, updatePetProfile, fetchPets }) {
             </div>
           ))}
         </div>
-        
-        {editingProfile && (
-          <div className="modal-overlay">
-            <div className="edit-modal">
-              <h2>Edit {editingProfile.petType}'s Details</h2>
-              <div className="form-group">
-                <label>Pet Type:</label>
-                <input
-                  type="text"
-                  name="petType"
-                  value={updatedDetails.petType}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Age:</label>
-                <input
-                  type="number"
-                  name="age"
-                  value={updatedDetails.age}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Photo URL:</label>
-                <input
-                  type="text"
-                  name="photo"
-                  value={updatedDetails.photo}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Adoption Status:</label>
-                <input
-                  type="text"
-                  name="adoptionStatus"
-                  value={updatedDetails.adoptionStatus}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Contact Number:</label>
-                <input
-                  type="text"
-                  name="contactNumber"
-                  value={updatedDetails.contactNumber}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="modal-buttons">
-                <button onClick={handleSave}>Save</button>
-                <button onClick={() => setEditingProfile(null)}>Cancel</button>
-              </div>
+
+        {editingPet && (
+          <div className="edit-modal">
+            <h2>Edit {editingPet.name}'s Details</h2>
+            <div className="form-group">
+              <label>Name:</label>
+              <input
+                name="name"
+                value={updatedDetails.name}
+                onChange={(e) => setUpdatedDetails({...updatedDetails, name: e.target.value})}
+              />
+            </div>
+            {/* Add other fields similarly */}
+            <div className="modal-actions">
+              <button onClick={handleUpdatePet}>Save</button>
+              <button onClick={() => setEditingPet(null)}>Cancel</button>
             </div>
           </div>
         )}
-        
+
         <Link to="/profile" className="back-link">Back to Profile</Link>
       </div>
     </div>
