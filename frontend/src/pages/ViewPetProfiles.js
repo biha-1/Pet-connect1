@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import * as XLSX from 'xlsx';
 import '../styles/petProfile.css';
 
 function ViewPetProfiles() {
@@ -102,6 +103,29 @@ function ViewPetProfiles() {
     }
   };
 
+  const handleDownloadReport = () => {
+    // Prepare data for Excel
+    const reportData = pets.map(pet => ({
+      'Pet Name': pet.name || 'N/A',
+      'Type': pet.petType || 'N/A',
+      'Age': pet.age || 'N/A',
+      'Breed': pet.breed || 'N/A',
+      'Adoption Status': pet.ad
+    }));
+
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(reportData);
+    
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Pet Report');
+    
+    // Generate Excel file
+    XLSX.writeFile(workbook, 'Pet_Report.xlsx', {
+      compression: true
+    });
+  };
+
   if (loading) return <div className="loading">Loading pet profiles...</div>;
   if (error) return <div className="error">Error: {error}</div>;
 
@@ -109,7 +133,16 @@ function ViewPetProfiles() {
     <div className="view-pets-page">
       <Navbar />
       <div className="container">
-        <h1>Available Pets</h1>
+        <div className="header-section">
+          <h1>Available Pets</h1>
+          <button 
+            className="download-report-btn"
+            onClick={handleDownloadReport}
+            disabled={pets.length === 0}
+          >
+            Download Excel Report
+          </button>
+        </div>
         
         <div className="pet-profiles-grid">
           {pets.map((pet) => (
