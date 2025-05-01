@@ -1,7 +1,4 @@
 import Pet from '../models/Pet.js';
-import path from 'path';
-import fs from 'fs';
-
 
 // Create a pet profile
 export const createPet = async (req, res) => {
