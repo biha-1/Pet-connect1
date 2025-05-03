@@ -46,15 +46,32 @@ function ViewPetProfiles() {
       }
 
       if (window.confirm('Are you sure you want to delete this pet profile?')) {
-        await axios.delete(`http://localhost:5000/api/pets/${petId}`, {
-          headers: { 'x-auth-token': token }
-        });
-        fetchPets(); // Refresh the list
-        alert('Pet profile deleted successfully');
+        const response = await axios.delete(
+          `http://localhost:5000/api/pets/${petId}`, 
+          {
+            headers: { 
+              'x-auth-token': token,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.data.success) {
+          // Optimistic UI update
+          setPets(prevPets => prevPets.filter(pet => pet._id !== petId));
+          alert('Pet profile deleted successfully');
+        } else {
+          throw new Error(response.data.message || 'Delete failed');
+        }
       }
     } catch (err) {
-      console.error('Delete error:', err);
+      console.error('Detailed delete error:', {
+        message: err.message,
+        response: err.response?.data
+      });
+      
       alert(`Failed to delete pet: ${err.response?.data?.message || err.message}`);
+      fetchPets(); // Refresh list if error occurs
     }
   };
 

@@ -1,4 +1,5 @@
 import Pet from '../models/Pet.js';
+import mongoose from 'mongoose';
 
 // Create a pet profile
 export const createPet = async (req, res) => {
@@ -118,9 +119,17 @@ export const updatePet = async (req, res) => {
   }
 };
 
-// Delete pet
+// Delete pet - FIXED VERSION
 export const deletePet = async (req, res) => {
   try {
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid pet ID format'
+      });
+    }
+
     const pet = await Pet.findById(req.params.id);
     
     if (!pet) {
@@ -130,23 +139,33 @@ export const deletePet = async (req, res) => {
       });
     }
 
-    if (pet.owner.toString() !== req.user.id) {
+    // Verify ownership
+    if (pet.owner.toString() !== req.user.id.toString()) {
       return res.status(403).json({ 
         success: false,
         message: 'Not authorized to delete this pet' 
       });
     }
 
-    await pet.remove();
+    // FIX: Using deleteOne() instead of remove()
+    await Pet.deleteOne({ _id: req.params.id });
+    
     res.status(200).json({ 
       success: true,
-      data: {} 
+      message: 'Pet successfully deleted',
+      deletedId: req.params.id
     });
+    
   } catch (err) {
-    console.error('Delete pet error:', err);
+    console.error('Delete pet error:', {
+      message: err.message,
+      stack: err.stack,
+      params: req.params
+    });
+    
     res.status(500).json({ 
       success: false,
-      message: 'Failed to delete pet',
+      message: 'Server error during deletion',
       error: err.message 
     });
   }
