@@ -3,21 +3,17 @@ import mongoose from 'mongoose';
 const PetSchema = new mongoose.Schema({
   petType: {
     type: String,
-    required: [true, 'Pet type is required'],
     enum: ['Dog', 'Cat', 'Bird', 'Rabbit', 'Other']
   },
   name: {
     type: String,
-    required: [true, 'Pet name is required']
   },
   age: {
     type: Number,
-    required: [true, 'Age is required'],
     min: [0, 'Age cannot be negative']
   },
   photo: {
     type: String,
-    required: [true, 'Photo URL is required']
   },
   adoptionStatus: {
     type: String,
@@ -26,7 +22,6 @@ const PetSchema = new mongoose.Schema({
   },
   contactNumber: {
     type: String,
-    required: [true, 'Contact number is required'],
     validate: {
       validator: function(v) {
         return /^[0-9]{10,15}$/.test(v);
@@ -35,15 +30,14 @@ const PetSchema = new mongoose.Schema({
     }
   },
   breed: {
-    type: String
+    type: String,
   },
   description: {
-    type: String
+    type: String,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: 'User'
   }
 }, { timestamps: true });
 

@@ -50,18 +50,30 @@ function CreatePetProfile() {
         return;
       }
 
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('type', formData.type);
-      formDataToSend.append('breed', formData.breed);
-      formDataToSend.append('age', formData.age);
-      formDataToSend.append('gender', formData.gender);
-      formDataToSend.append('description', formData.description);
-      if (formData.images) {
-        formDataToSend.append('images', formData.images);
-      }
+      const payload = {
+        name: formData.name,  
+        petType: formData.type,
+        breed: formData.breed,
+        age: formData.age,
+        gender: formData.gender,
+        description: formData.description
 
-      await axios.post('http://localhost:5000/api/pets', formDataToSend, {
+      }
+        //hdjdjfkgklglglgl
+      // const formDataToSend = new FormData();
+      // formDataToSend.append('name', formData.name);
+      // formDataToSend.append('type', formData.type);
+      // formDataToSend.append('breed', formData.breed);
+      // formDataToSend.append('age', formData.age);
+      // formDataToSend.append('gender', formData.gender);
+      // formDataToSend.append('description', formData.description);
+      // if (formData.images) {
+      //   formDataToSend.append('images', formData.images);
+      // }
+
+      console.log('Form data to send:', payload);
+
+      await axios.post('http://localhost:5000/api/pets', payload, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'x-auth-token': token,
